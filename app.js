@@ -114,9 +114,10 @@ function barChart(el,rows,valFn,fmt){
     svg.append('text').attr('x',ml+x(valFn(r))+5).attr('y',y+rh/2+1).attr('font-size',11).style('fill','var(--color-fg-muted)').text(fmt(valFn(r)));});
 }
 
-const usageCols=[{f:'state'},{f:'mau_base',num:1,fmt:fInt},{f:'pct_of_population',num:1,fmt:v=>fPct1(v)+'%'},{f:'usage_rank',num:1},{f:'growth_label'}];
+let rankBy='mau_base';
+const usageCols=[{f:'__rank',num:1,fmt:(v,r)=>r.__rank},{f:'state'},{f:'mau_base',num:1,fmt:fInt},{f:'pct_of_population',num:1,fmt:v=>fPct1(v)+'%'},{f:'growth_label'}];
 const scenFields=()=>['state','mau_now',ui.hor==='6'?'mau_6m':'mau_12m',ui.hor==='6'?'added_6m':'added_12m',ui.hor==='6'?'growth_pct_6m':'growth_pct_12m'];
-wireSort(document.getElementById('tbl-usage'),'usage',()=>usageCols.map(c=>c.f));
+wireSort(document.getElementById('tbl-usage'),'usage',()=>[null,'state','mau_base','pct_of_population',null]);
 wireSort(document.getElementById('tbl-scen'),'scen',scenFields);
 
 function render(){
@@ -129,7 +130,11 @@ function render(){
     if(st.status!=='ok'){fail(mapEl,'states');}else{const rows=st.data.map(r=>({...r}));
       if(ui.metric==='pct')drawMap(mapEl,rows,r=>+r.pct_of_population,v=>fPct1(v)+'%',r=>[r.state,fInt(r.mau_base)+' modeled users',fPct1(r.pct_of_population)+'% of residents','Usage rank '+r.usage_rank+' of 51'],'% of residents');
       else drawMap(mapEl,rows,r=>+r.mau_base,v=>compact.format(v),r=>[r.state,fInt(r.mau_base)+' modeled users',fPct1(r.pct_of_population)+'% of residents','Usage rank '+r.usage_rank+' of 51'],'users');
-      const tbl=document.getElementById('tbl-usage');let rs=rows.filter(r=>r.state.toLowerCase().includes(q.usage));rs=sortRows(rs,sort.usage);buildTable(tbl,usageCols,rs,r=>r.state);}
+      const tbl=document.getElementById('tbl-usage');if(sort.usage.f==='mau_base'||sort.usage.f==='pct_of_population')rankBy=sort.usage.f;
+      const order=rows.slice().sort(rankBy==='mau_base'?(a,b)=>b.mau_base-a.mau_base||a.state.localeCompare(b.state):(a,b)=>a.usage_rank-b.usage_rank);
+      order.forEach((r,i)=>{r.__rank=i+1;});
+      document.getElementById('th-urank').textContent=rankBy==='mau_base'?'# by users':'# by % of residents';
+      let rs=rows.filter(r=>r.state.toLowerCase().includes(q.usage));rs=sortRows(rs,sort.usage);buildTable(tbl,usageCols,rs,r=>r.state);}
   }
   if(ui.page==='momentum'){
     const rq=dash.data('rank_quarter'),ws=dash.data('work_share'),ce=document.getElementById('ch-rank'),cw=document.getElementById('ch-work'),chips=document.getElementById('chips');
@@ -172,7 +177,7 @@ function render(){
   }
   const vi=dash.data('vintage');
   if(vi.status==='ok')buildTable(document.getElementById('tbl-vint'),[{f:'item'},{f:'as_of'},{f:'age'},{f:'affects'}],vi.data,r=>r.item);
-  if(vi.status==='ok'){const e=document.getElementById('vnow');const row=vi.data.find(r=>r.item==='State usage rank and topic shares');if(e&&row)e.textContent=row.as_of;}
+  if(vi.status==='ok'){[['vnow','State usage rank and topic shares'],['vnow2','OpenAI Signals release overall']].forEach(([id,item])=>{const e=document.getElementById(id);const row=vi.data.find(r=>r.item===item);if(e&&row)e.textContent=row.as_of;});}
   // headline figures
   const nt=dash.data('natl'),rc=dash.data('rankchg');
   ux.querySelectorAll('[data-source=natl][data-field]').forEach(e=>{if(nt.status!=='ok'){return;}const r=nt.data[0],f=e.dataset.field;const v=r[f];e.textContent=f==='total_mau'?compact.format(v):f==='top_users_value'?fInt(v):f==='top_pct_value'?fPct1(v)+'%':v;});
