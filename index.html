@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChatGPT Usage by State</title>
+<meta name="description" content="Modeled estimates of ChatGPT monthly users by US state, how the US compares globally, and growth scenarios. Modeled, not measured.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="dash-root">
+<div id="ux" class="ux">
+  <button type="button" class="ux-badge" id="badge" aria-describedby="badge-tip" aria-expanded="false">Modeled estimates, not measured. OpenAI publishes no state-level user counts. &#9432;</button><div class="ux-badge-tip" id="badge-tip" role="tooltip" hidden><b>How the modeled numbers are made</b><ol><li>Start with a national estimate of US monthly ChatGPT users from third-party sources. OpenAI does not publish one.</li><li>Split it across states by population.</li><li>Tilt each state up or down by its rank in OpenAI Signals' 2025 per-capita message ranking, then rescale so the states add back to the national total.</li></ol><p>So the state figures show how users are likely distributed, not a count. Scenarios add assumed national growth, extra catch-up room for lower-ranked states, and a small tilt for states on published fast-adopting lists. See Method and sources for every assumption and reference.</p></div>
+  <h1 id="top">Where ChatGPT usage is highest, and where it could grow</h1>
+  <p class="ux-sub">Modeled monthly users by state, how the US compares globally, and 6 and 12 month scenarios.</p>
+  <div class="ux-vint"><button type="button" class="ux-vbtn" id="vbtn" aria-expanded="false" aria-controls="vbody"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.5V8l2.5 1.5"/></svg><span>How current is this data?</span></button><span class="ux-vnow">State data as of <span data-source="vintage" data-field="as_of" data-where="item=State usage rank and topic shares" id="vnow">—</span></span></div>
+  <div class="ux-card" id="vbody" hidden style="margin-bottom:var(--cds-gap-md)"><h2>How current is this data?</h2><p class="ux-note">Recent state-level data is hard to get. This is how old each input was when the dashboard was built on October 23, 2026.</p>
+    <div class="ux-tbl-box" style="max-height:none"><table id="tbl-vint" data-source="vintage" data-row-key="item"><thead><tr>
+      <th data-field="item">Input</th><th data-field="as_of">As of</th><th data-field="age">Age</th><th data-field="affects">What it affects</th>
+    </tr></thead><tbody></tbody></table></div></div>
+  <div class="ux-tabs" role="tablist">
+    <button class="ux-tab" role="tab" data-page="usage" aria-selected="true">Where usage is</button>
+    <button class="ux-tab" role="tab" data-page="momentum" aria-selected="false">Momentum</button>
+    <button class="ux-tab" role="tab" data-page="scenarios" aria-selected="false">6 to 12 month scenarios</button>
+    <button class="ux-tab" role="tab" data-page="method" aria-selected="false">Method and sources</button>
+  </div>
+
+  <section id="usage" data-pg="usage">
+    <div class="ux-kpis">
+      <div class="ux-card ux-kpi"><div class="l">Modeled US monthly users (base)</div><div class="v" data-source="natl" data-field="total_mau" data-row="0">—</div><div class="s">Allocated to states by population and per-capita usage</div></div>
+      <div class="ux-card ux-kpi"><div class="l">Most users</div><div class="v" data-source="natl" data-field="top_users_state" data-row="0">—</div><div class="s"><span data-source="natl" data-field="top_users_value" data-row="0">—</span> modeled users</div></div>
+      <div class="ux-card ux-kpi"><div class="l">Highest share of residents</div><div class="v" data-source="natl" data-field="top_pct_state" data-row="0">—</div><div class="s"><span data-source="natl" data-field="top_pct_value" data-row="0">—</span> of residents</div></div>
+    </div>
+    <div class="ux-card" style="margin-bottom:var(--cds-gap-md)">
+      <h2 id="usage-map">Modeled usage by state</h2>
+      <p class="ux-note">States shaded by value; darker means higher. Switch to Tiles for equal-size squares that make small states easier to see.</p>
+      <div class="ux-controls"><span>View</span><span class="ux-seg" data-seg="view"><button data-v="map" aria-pressed="true">Map</button><button data-v="tiles" aria-pressed="false">Tiles</button></span><span>Color by</span><span class="ux-seg" data-seg="metric"><button data-v="pct" aria-pressed="true">Share of residents</button><button data-v="mau" aria-pressed="false">Total users</button></span></div>
+      <div class="ux-wrap" id="map-usage" data-source="states geo"></div>
+        <details class="ux-more"><summary>What does this map show?</summary><div class="ux-prose"><p>Each state is shaded by modeled monthly ChatGPT users, either as a share of residents or as total users. Share of residents shows how deeply ChatGPT has worked its way into everyday life in a place. Total users shows the sheer size of the audience. They tell different stories: a small state can lead on share and still be a modest audience, while a large state can have a lower share and still hold millions of people.</p><p>For anyone thinking about where people are likely to see and act on ads inside AI conversations, share of residents is the closer clue to habit and familiarity, and total users is the closer clue to reach. Neither measures ad inventory, ad delivery or results, and both are modeled from 2025 patterns rather than counted today.</p></div></details>
+    </div>
+    <div class="ux-card">
+      <h2 id="usage-table">All states</h2>
+      <p class="ux-note">Click a column to sort. Usage rank is OpenAI Signals' 2025 messages-per-capita rank (1 is highest).</p>
+      <input class="ux-search" id="search-usage" type="search" placeholder="Search states" aria-label="Search states">
+      <div class="ux-tbl-box"><table id="tbl-usage" data-source="states" data-row-key="state"><thead><tr>
+        <th data-field="state">State</th><th data-field="mau_base" class="num">Modeled users</th><th data-field="pct_of_population" class="num">% of residents</th><th data-field="usage_rank" class="num">Usage rank</th><th data-field="growth_label">Growth signal</th>
+      </tr></thead><tbody></tbody></table></div>
+        <details class="ux-more"><summary>How should I read this table?</summary><div class="ux-prose"><p>The table puts the map's numbers side by side so states can be sorted and compared. Usage rank comes straight from OpenAI's 2025 ranking of messages per resident, the most direct measure of how often people in a state actually turn to ChatGPT. The user counts and shares are built from it, so they move together. What differs is whether you care about a state's size or its intensity.</p><p>Sort by share of residents to find places where ChatGPT is already part of daily routines, and by modeled users to find where the largest crowds are. Where those two lists disagree is where the trade-off between depth and scale sits.</p><p>The growth signal column counts how many of two published 2025 lists of fast-adopting states a state appears on. One list comes from an OpenAI report as covered by Business Insider. The other is a July 2025 quarter-over-quarter list from the Council on Competitiveness, which cites OpenAI data. Both are dated and neither explains its method in full, so treat the signal as a hint. The full references are on the Method and sources tab.</p></div></details>
+    </div>
+  </section>
+
+  <section id="momentum" data-pg="momentum" hidden>
+    <div class="ux-kpis">
+      <div class="ux-card ux-kpi"><div class="l">US per-capita rank, first quarter shown</div><div class="v" data-source="rankchg" data-field="first_rank" data-row="0">—</div><div class="s" data-source="rankchg" data-field="first_q" data-row="0">—</div></div>
+      <div class="ux-card ux-kpi"><div class="l">US per-capita rank, latest quarter</div><div class="v" data-source="rankchg" data-field="last_rank" data-row="0">—</div><div class="s" data-source="rankchg" data-field="last_q" data-row="0">—</div></div>
+    </div>
+    <div class="ux-grid">
+      <div class="ux-card"><h2 id="mom-rank">US rank by messages per capita</h2><p class="ux-note">Relative, not absolute: a lower line means more usage per resident than other countries. A falling US rank means other countries are growing faster.</p><div class="ux-wrap" id="ch-rank" data-source="rank_quarter" style="min-height:300px"></div>
+        <details class="ux-more"><summary>What does this chart show?</summary><div class="ux-prose"><p>This follows the US against other countries on how much each resident uses ChatGPT, quarter by quarter. It is a ranking, so a falling line does not mean fewer Americans are using it. It means people elsewhere picked it up faster. Some markets that started lower, such as Japan and South Korea, have climbed quickly, and the US has been drifting down the list.</p><p>It is the sober counterweight to the state map: the US is a large, established audience, but it is no longer where per-person usage is rising fastest. Audience behavior is shifting more quickly in other markets, which limits how much new reach a US-only view can promise.</p></div></details></div>
+      <div class="ux-card"><h2 id="mom-work">Work-related share of messages</h2><p class="ux-note">US vs all countries, monthly, consumer accounts.</p><div class="ux-wrap" id="ch-work" data-source="work_share" style="min-height:300px"></div>
+        <details class="ux-more"><summary>What does this chart show?</summary>
+          <div class="ux-prose">
+            <p>Each month, OpenAI's automated classifiers label a sample of consumer ChatGPT messages as work-related or not. The chart shows the work-related share of those messages for the US and for all countries combined. The other messages are personal use, such as learning, advice, writing for yourself or entertainment. People do not read the messages.</p>
+            <p>Over the period shown, the work-related share declined, and the US tracks the world closely.</p>
+            <p><b>A falling share of work messages means personal use grew faster, not that work use shrank.</b></p>
+            <p>The shift toward personal use suggests that ChatGPT's growing audience is increasingly using it in everyday, non-work contexts. That's relevant to which kinds of ad contexts fit. It doesn't say anything about specific states or about ad performance.</p>
+            <p><b>Limits:</b> The data covers consumer accounts of adults only, so business use is understated. It is a share of messages, not of users, so heavy users count for more. The US line comes from a sampled subset with privacy noise added, so small month-to-month moves are partly noise.</p>
+          </div>
+        </details></div>
+    </div>
+    <div class="ux-card"><h2 id="mom-lists">States on published fast-adoption lists</h2><p class="ux-note">Two mid-2025 lists of fastest-adopting states. Bold chips are on both. Directional only: the lists are dated and disagree.</p><div class="ux-chips" id="chips" data-source="states"></div>
+        <details class="ux-more"><summary>What are these lists?</summary><div class="ux-prose"><p>These are two published lists of states where ChatGPT use was growing fastest in 2025. They come from different analyses, they disagree on most states, and neither explains its method in detail, so a state appearing on one list is a hint, not a verdict. Appearing on both is a stronger hint.</p><p>What matters is the pattern they point to: adoption was spreading beyond the usual tech-heavy states, including some smaller and less urban ones. That suggests today's high-usage states may not be the only places where habits are forming, and that newer adopters often use ChatGPT differently from early ones. The lists are more than a year old and say nothing about current growth.</p></div></details></div>
+  </section>
+
+  <section id="scenarios" data-pg="scenarios" hidden>
+    <div class="ux-card" style="margin-bottom:var(--cds-gap-md)">
+      <h2 id="scen-nat">National scenarios</h2>
+      <p class="ux-note">Scenario analysis, not a forecast.</p>
+      <table id="tbl-snat" data-source="scen_nat" data-row-key="scenario"><thead><tr>
+        <th data-field="scenario">Scenario</th><th data-field="growth_pct" class="num">12 month growth</th><th data-field="mau_now" class="num">Now</th><th data-field="mau_6m" class="num">6 months</th><th data-field="mau_12m" class="num">12 months</th>
+      </tr></thead><tbody></tbody></table>
+        <details class="ux-more"><summary>How should I read these scenarios?</summary><div class="ux-prose"><p>The low, base and high cases show the same starting audience growing at three different speeds over the coming months. They are what-if exercises, not predictions, and the growth rates are assumptions chosen to bracket a plateau, modest growth and a stronger pickup.</p><p>The useful comparison is the spread between the cases. If the plateau case is closer to reality, reach grows mostly through new habits among existing users. If the high case is, the audience itself is expanding. Either way, more users does not automatically mean more people paying attention to ads, so treat these as audience-size scenarios, not ad-delivery scenarios.</p></div></details>
+    </div>
+    <div class="ux-controls">
+      <span>Scenario</span><span class="ux-seg" data-seg="scen"><button data-v="low" aria-pressed="false">Low</button><button data-v="base" aria-pressed="true">Base</button><button data-v="high" aria-pressed="false">High</button></span>
+      <span>Horizon</span><span class="ux-seg" data-seg="hor"><button data-v="6" aria-pressed="false">6 months</button><button data-v="12" aria-pressed="true">12 months</button></span>
+      <span>View</span><span class="ux-seg" data-seg="view"><button data-v="map" aria-pressed="true">Map</button><button data-v="tiles" aria-pressed="false">Tiles</button></span><span>Color by</span><span class="ux-seg" data-seg="smetric"><button data-v="added" aria-pressed="true">Users added</button><button data-v="pct" aria-pressed="false">Growth %</button></span>
+    </div>
+    <div class="ux-grid">
+      <div class="ux-card"><h2 id="scen-map">Projected growth by state</h2><p class="ux-note">Where the model adds the most users, or grows fastest.</p><div class="ux-wrap" id="map-scen" data-source="scenarios geo"></div>
+        <details class="ux-more"><summary>What does this map show?</summary><div class="ux-prose"><p>This shades each state by how many users it is modeled to add, or how fast it grows, under the scenario and horizon chosen above. Users added favors large states, because a small percentage on a big base is still a lot of people. Growth percent favors smaller or lower-usage states, because they have more room to catch up.</p><p>The two views mirror two questions about consumer behavior: where the biggest new crowds could form, and where habits are changing fastest. The catch-up effect is an assumption built into the model, not something measured, so read fast growth in a low-usage state as room to grow rather than proven momentum.</p></div></details></div>
+      <div class="ux-card"><h2 id="scen-bars">Top 12 states by users added</h2><p class="ux-note">Large states dominate absolute adds. Switch to growth % on the map to see fast-growing smaller states.</p><div class="ux-wrap" id="bars-scen" data-source="scenarios" style="min-height:340px"></div>
+        <details class="ux-more"><summary>What does this chart show?</summary><div class="ux-prose"><p>The ranking lists the states the model expects to add the most users. It is dominated by the biggest states because size does most of the work, so the order changes little between cases. What changes is how large the bars are.</p><p>In practice this is a view of where the largest additional audiences could appear, not where people are most receptive. Receptiveness is better judged by usage per resident on the first tab. Reading the two together separates places that are simply big from places where ChatGPT is deeply habitual.</p></div></details></div>
+    </div>
+    <div class="ux-card">
+      <h2 id="scen-table">All states, selected scenario</h2>
+      <input class="ux-search" id="search-scen" type="search" placeholder="Search states" aria-label="Search states">
+      <div class="ux-tbl-box"><table id="tbl-scen" data-source="scenarios" data-row-key="scenario_state"><thead><tr>
+        <th data-field="state">State</th><th data-field="mau_now" class="num">Now</th><th class="num" id="th-end">Projected</th><th class="num" id="th-add">Users added</th><th class="num" id="th-pct">Growth %</th>
+      </tr></thead><tbody></tbody></table></div>
+        <details class="ux-more"><summary>How do I use this table?</summary><div class="ux-prose"><p>This is the full list behind the map and chart for the selected scenario. It is useful for checking a specific state, or for sorting by growth percent to spot places the model treats as fast-moving. Because every state's growth traces back to the same national assumption plus two small tilts, differences between neighboring states are small and should not be over-read.</p><p>It works best for comparing states with each other rather than quoting any single number. A state's figure here is a modeled estimate with a wide margin of error, built from 2025 patterns.</p></div></details>
+    </div>
+  </section>
+
+  <section id="method" data-pg="method" hidden>
+    <div class="ux-card ux-prose" style="margin-bottom:var(--cds-gap-md)">
+      <h2 id="method-how">How the estimates are built</h2>
+      <p>Start with a national estimate of US monthly active users from third-party sources (OpenAI does not publish one). Allocate it to states by population, then tilt each state by OpenAI Signals' official 2025 per-capita message rank. The result is a modeled estimate, not a count.</p>
+      <p>Scenarios apply a national growth case, give lower-ranked states more catch-up room, and add a small tilt for states on the published fast-adopting lists. State growth is rescaled so the total matches the national case.</p>
+      <h2 style="margin-top:var(--cds-gap-md)">What this cannot tell you</h2>
+      <p>OpenAI's state data is a single 2025 annual rank, not a time series, so no state-level growth is measured here. The fast-adopting lists date from mid-2025 and use unpublished methods. National user counts are third-party estimates. Data covers consumer accounts of adults and understates business use. Scenario growth rates are analyst assumptions.</p>
+      <p>Sources: OpenAI Signals data download (CC BY 4.0); DemandSage and Semrush national estimates; Chatronix and Business Insider and Council on Competitiveness for growth lists; Semrush clickstream for US traffic plateau.</p>
+    </div>
+    <div class="ux-card"><h2 id="method-assump">Assumptions</h2><p class="ux-note">Change any of these by asking.</p>
+      <table id="tbl-assump" data-source="assumptions" data-row-key="parameter"><thead><tr>
+        <th data-field="parameter">Parameter</th><th data-field="value" class="num">Value</th><th data-field="unit">Unit</th><th data-field="note">Basis</th>
+      </tr></thead><tbody></tbody></table>
+        <details class="ux-more"><summary>Why these assumptions?</summary><div class="ux-prose"><p>The growth rates are meant to bracket what the evidence supports: recent signs that US usage has leveled off, a modest pace overall, and an upside case for renewed momentum. The catch-up and momentum tilts reflect a pattern seen globally, where lower-usage markets tend to gain faster as habits spread.</p><p>Changing any of them moves every projection, which makes them the first place to look when a result seems surprising. They reflect judgment, which is why they are listed openly rather than buried.</p></div></details></div>
+    <div class="ux-card" style="margin-top:var(--cds-gap-md)"><h2 id="method-sources">References and sources</h2><p class="ux-note">Every dataset, estimate and assumption on this dashboard, with where it came from.</p>
+      <div class="ux-tbl-box"><table id="tbl-src" data-source="sources" data-row-key="source"><thead><tr>
+        <th data-field="source">Source</th><th data-field="as_of">Data as of</th><th data-field="used_for">Used for</th><th data-field="note">Notes</th><th data-field="link">Link</th>
+      </tr></thead><tbody></tbody></table></div></div>
+  </section>
+  <p class="ux-foot">Contains data from OpenAI Signals, licensed CC BY 4.0. Other inputs are third-party estimates. Modeled figures are Claude's analysis, not measurements. <button type="button" id="to-sources">Full references</button></p>
+  <div class="ux-tip" id="tip"></div>
+</div>
+</div>
+<script src="d3.min.js"></script>
+<script src="data.js"></script>
+<script src="shim.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
