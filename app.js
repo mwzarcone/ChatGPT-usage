@@ -1,3 +1,4 @@
+
 (function(){
 const ux=document.getElementById('ux');
 const fInt=d3.format(','), fPct1=d3.format('.1f');
@@ -101,6 +102,26 @@ function lineChart(el,series,o){
   hit.on('mousemove',ev=>{const [mx]=d3.pointer(ev);let best=0,bd=1e9;xsVals.forEach((x,i)=>{const d=Math.abs(px({x})-mx);if(d<bd){bd=d;best=i;}});
     showTip(ev,[o.fmtX(xsVals[best])].concat(series.map(s=>s.name+': '+o.fmtY(s.values[best].y))));}).on('mouseleave',hideTip);
 }
+function slopeChart(el,rows){
+  el.replaceChildren();const W=Math.max(el.clientWidth,260),H=470,m={t:28,b:10,l:Math.min(124,W*.3),r:Math.min(124,W*.3)};
+  const svg=d3.select(el).append('svg').attr('width','100%').attr('viewBox','0 0 '+W+' '+H).attr('role','img');
+  const y=d3.scaleLinear([75,0],[m.t,H-m.b-6]),x0=m.l,x1=W-m.r,muted='var(--cds-chart-muted)';
+  const col={ChatGPT:dash.colors[0],Gemini:dash.colors[1]||dash.colors[0],Claude:dash.colors[2]||dash.colors[0]};
+  const strong=n=>n==='ChatGPT'||n==='Gemini'||n==='Claude';
+  [['Oct 2025',x0],['Sep 2026',x1]].forEach(([t,x])=>svg.append('text').attr('x',x).attr('y',14).attr('text-anchor','middle').attr('font-size',11).style('fill','var(--color-fg-muted)').text(t));
+  const spread=(items)=>{items.sort((a,b)=>b.y-a.y);let lim=H-m.b+2;items.forEach(i=>{i.ly=Math.min(i.y,lim);lim=i.ly-14;});};
+  const L=rows.map(r=>({r,y:y(r.share_oct_2025)})),R=rows.map(r=>({r,y:y(r.share_sep_2026)}));spread(L);spread(R);
+  rows.forEach(r=>{const c=strong(r.chatbot)?col[r.chatbot]:muted;
+    svg.append('line').attr('x1',x0).attr('x2',x1).attr('y1',y(r.share_oct_2025)).attr('y2',y(r.share_sep_2026)).style('stroke',c).attr('stroke-width',r.chatbot==='ChatGPT'?3:strong(r.chatbot)?2.5:1.5).attr('stroke-linecap','round');
+    [[x0,r.share_oct_2025],[x1,r.share_sep_2026]].forEach(([x,v])=>svg.append('circle').attr('cx',x).attr('cy',y(v)).attr('r',3.5).style('fill',c));});
+  const lab=(items,k,x,anc,f)=>items.forEach(i=>svg.append('text').attr('x',x).attr('y',i.ly+4).attr('text-anchor',anc).attr('font-size',11).attr('font-weight',strong(i.r.chatbot)?600:400).style('fill',strong(i.r.chatbot)?'var(--color-fg)':'var(--color-fg-muted)').text(f(i.r)));
+  lab(L,0,x0-8,'end',r=>r.chatbot+' '+r.share_oct_2025.toFixed(1)+'%');
+  lab(R,0,x1+8,'start',r=>r.share_sep_2026.toFixed(1)+'% '+r.chatbot);
+  const sx=d3.scaleLinear([x0,x1],[0,1]);
+  const hit=svg.append('rect').attr('x',x0).attr('y',m.t-6).attr('width',x1-x0).attr('height',H-m.t-m.b+6).style('fill','transparent');
+  hit.on('mousemove',ev=>{const [mx,my]=d3.pointer(ev);const t=sx(mx);let best=null,bd=1e9;rows.forEach(r=>{const yy=y(r.share_oct_2025)+(y(r.share_sep_2026)-y(r.share_oct_2025))*t;const d=Math.abs(yy-my);if(d<bd){bd=d;best=r;}});
+    if(best){const s=best.change_pts;showTip(ev,[best.chatbot,'Oct 2025: '+best.share_oct_2025.toFixed(1)+'%','Sep 2026: '+best.share_sep_2026.toFixed(1)+'%',(s>0?'+':'')+s.toFixed(1)+' points','About '+compact.format(best.visits_sep_2026_m*1e6)+' visits in Sep 2026 (estimate)']);}}).on('mouseleave',hideTip);
+}
 function barChart(el,rows,valFn,fmt){
   el.replaceChildren();const W=Math.max(el.clientWidth,260),rh=24,H=rows.length*rh+8;
   const probe=document.createElementNS('http://www.w3.org/2000/svg','svg');probe.setAttribute('width','0');probe.setAttribute('height','0');el.append(probe);
@@ -151,6 +172,23 @@ function render(){
       }
     if(st.status!=='ok')fail(chips,'states');else{chips.replaceChildren();st.data.filter(r=>r.growth_lists>0).sort((a,b)=>b.growth_lists-a.growth_lists||a.state.localeCompare(b.state)).forEach(r=>{const c=document.createElement('span');c.className='ux-chip'+(r.growth_lists===2?' two':'');c.textContent=r.state;chips.append(c);});}
   }
+  if(ui.page==='chatbots'){
+    const cb=dash.data('chatbots'),sl=document.getElementById('ch-slope'),tr=document.getElementById('ch-trend');
+    if(cb.status!=='ok'){fail(sl,'chatbots');fail(tr,'chatbots');}else{
+      const rows=cb.data,g=rows.find(r=>r.chatbot==='ChatGPT'),ge=rows.find(r=>r.chatbot==='Gemini');
+      const set=(id,t)=>{document.getElementById(id).textContent=t;};
+      set('kp-share',g.share_sep_2026.toFixed(1)+'%');
+      set('kp-chg',(g.change_pts>0?'+':'−')+Math.abs(g.change_pts).toFixed(1)+' pts');set('kp-chg-s','From '+g.share_oct_2025.toFixed(1)+'% in October 2025');
+      set('kp-vis',(g.visits_sep_2026_m/1000).toFixed(1)+'B');
+      set('kp-ratio',(g.visits_sep_2026_m/ge.visits_sep_2026_m).toFixed(1)+'×');set('kp-ratio-s','Gemini: about '+(ge.visits_sep_2026_m/1000).toFixed(1)+'B visits');
+      slopeChart(sl,rows);
+      const labs=['Oct 2025','Apr 2026','Sep 2026'];
+      const mk=(n,c,strong)=>{const r=rows.find(x=>x.chatbot===n);return {name:n,strong,color:c,values:[r.share_oct_2025,r.share_apr_2026,r.share_sep_2026].map((v,i)=>({x:labs[i],y:v}))};};
+      lineChart(tr,[mk('ChatGPT',dash.colors[0],true),mk('Gemini',dash.colors[1]||'var(--cds-chart-muted)',false),mk('Claude',dash.colors[2]||'var(--cds-chart-muted)',false)],{xs:d3.scalePoint(labs,[0,1]).padding(0.1),yDomain:[80,0],fmtX:s=>s,fmtY:v=>(Number.isInteger(v)&&v%20===0)?v+'%':v.toFixed(1)+'%'});
+      const f1=v=>v==null?'—':v.toFixed(1)+'%';
+      buildTable(document.getElementById('tbl-chat'),[{f:'chatbot'},{f:'share_oct_2025',num:1,fmt:f1},{f:'share_apr_2026',num:1,fmt:f1},{f:'share_sep_2026',num:1,fmt:f1},{f:'change_pts',num:1,fmt:v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)},{f:'visits_sep_2026_m',num:1,fmt:fInt}],rows,r=>r.chatbot);
+    }
+  }
   if(ui.page==='scenarios'){
     const sc=dash.data('scenarios');const mapEl=document.getElementById('map-scen'),barEl=document.getElementById('bars-scen');
     const sn=dash.data('scen_nat');
@@ -196,5 +234,5 @@ const vbtn=document.getElementById('vbtn'),vbody=document.getElementById('vbody'
 vbtn.addEventListener('click',()=>{const o=vbody.hidden;vbody.hidden=!o;vbtn.setAttribute('aria-expanded',String(o));});
 dash.onData(render);
 const named=document.getElementById(location.hash.slice(1));
-if(named&&['usage','momentum','scenarios','method'].includes(named.id)){ui.page=named.id;render();}
+if(named&&['usage','momentum','chatbots','scenarios','method'].includes(named.id)){ui.page=named.id;render();}
 })();

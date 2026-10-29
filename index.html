@@ -21,6 +21,7 @@
   <div class="ux-tabs" role="tablist">
     <button class="ux-tab" role="tab" data-page="usage" aria-selected="true">Where usage is</button>
     <button class="ux-tab" role="tab" data-page="momentum" aria-selected="false">Momentum</button>
+    <button class="ux-tab" role="tab" data-page="chatbots" aria-selected="false">Chatbot share</button>
     <button class="ux-tab" role="tab" data-page="scenarios" aria-selected="false">6 to 12 month scenarios</button>
     <button class="ux-tab" role="tab" data-page="method" aria-selected="false">Method and sources</button>
   </div>
@@ -72,6 +73,34 @@
         <details class="ux-more"><summary>What are these lists?</summary><div class="ux-prose"><p>These are two published lists of states where ChatGPT use was growing fastest in 2025. They come from different analyses, they disagree on most states, and neither explains its method in detail, so a state appearing on one list is a hint, not a verdict. Appearing on both is a stronger hint.</p><p>What matters is the pattern they point to: adoption was spreading beyond the usual tech-heavy states, including some smaller and less urban ones. That suggests today's high-usage states may not be the only places where habits are forming, and that newer adopters often use ChatGPT differently from early ones. The lists are more than a year old and say nothing about current growth.</p></div></details></div>
   </section>
 
+  <section id="chatbots" data-pg="chatbots" hidden>
+    <div class="ux-card" style="margin-bottom:var(--cds-gap-md)"><p class="ux-note" style="margin:0">Share of worldwide visits to AI chatbot websites, September 2026 compared with October 2025. Similarweb traffic data charted by Visual Capitalist. This is web traffic, not a count of users, and it is not specific to the US or to any state.</p></div>
+    <div class="ux-kpis">
+      <div class="ux-card ux-kpi"><div class="l">ChatGPT share of chatbot web visits</div><div class="v" id="kp-share">—</div><div class="s">September 2026</div></div>
+      <div class="ux-card ux-kpi"><div class="l">Change since October 2025</div><div class="v" id="kp-chg">—</div><div class="s" id="kp-chg-s">—</div></div>
+      <div class="ux-card ux-kpi"><div class="l">ChatGPT estimated visits</div><div class="v" id="kp-vis">—</div><div class="s">September 2026, estimate</div></div>
+      <div class="ux-card ux-kpi"><div class="l">ChatGPT visits vs Gemini</div><div class="v" id="kp-ratio">—</div><div class="s" id="kp-ratio-s">—</div></div>
+    </div>
+    <div class="ux-grid">
+      <div class="ux-card"><h2 id="cb-slope">Share of chatbot web visits by chatbot</h2><p class="ux-note">October 2025 to September 2026. Each line is one chatbot; hover for details.</p><div class="ux-wrap" id="ch-slope" data-source="chatbots" style="min-height:470px"></div>
+        <details class="ux-more"><summary>What does this chart show?</summary><div class="ux-prose">
+          <p>Each line follows one chatbot's share of all visits to chatbot websites worldwide, from October 2025 to September 2026. Similarweb measures the traffic and Visual Capitalist charted it. A point of share is one percent of all chatbot visits.</p>
+          <p>ChatGPT is still well ahead, but its share fell from 71.8% to 56.4%. Gemini rose from 13.6% to 25.0% and Claude from 2.3% to 9.6%. DeepSeek, Grok, Copilot and Perplexity all slipped.</p>
+          <p>In everyday terms, people are spreading their chatbot habits across more than one assistant, while the largest single audience still goes to ChatGPT. That matters for anyone thinking about where attention gathers: ChatGPT still offers the broadest reach, and a growing share of AI sessions now happens elsewhere. ChatGPT began showing ads to free users in early 2026, and Claude has positioned itself as ad-free. The data shows what happened to traffic over that period, not why.</p>
+          <p><b>Limits:</b> This shows shares, not totals, so a smaller share can still mean more visits if the whole market grew. It counts visits to chatbot websites worldwide, so it leaves out app use and it is not specific to the US. Visits are not people. The visit estimates are scaled from one published total, so treat them as approximate. It says nothing about ad delivery or ad performance.</p>
+        </div></details></div>
+      <div class="ux-card"><h2 id="cb-trend">Three leaders, three readings</h2><p class="ux-note">ChatGPT, Gemini and Claude at October 2025, April 2026 and September 2026. The other chatbots were not reported for April.</p><div class="ux-wrap" id="ch-trend" data-source="chatbots" style="min-height:300px"></div>
+        <details class="ux-more"><summary>What changed along the way?</summary><div class="ux-prose">
+          <p>The shift was not a steady slide. ChatGPT fell to 53.7% by April 2026, then recovered to 56.4% by September. Gemini climbed to 26.7% in April and eased back to 25.0%. Claude kept rising, from 2.3% to 8.0% to 9.6%, but more slowly after April.</p>
+          <p>The rebound is only five months old, which is too short to call a new trend. What it does show is that audience habits are still moving, and the order of the top three has been stable while the gaps between them narrowed.</p>
+          <p><b>Limits:</b> Three readings cannot show what happened between them, and the April figures cover only these three chatbots.</p>
+        </div></details></div>
+    </div>
+    <div class="ux-card"><h2 id="cb-table">All chatbots in the ranking</h2><p class="ux-note">Share of chatbot web visits. Visits are estimates for September 2026, in millions.</p>
+      <table id="tbl-chat"><thead><tr><th>Chatbot</th><th class="num">Oct 2025</th><th class="num">Apr 2026</th><th class="num">Sep 2026</th><th class="num">Change (pts)</th><th class="num">Est. visits (M)</th></tr></thead><tbody></tbody></table>
+      <p class="ux-note" style="margin-top:var(--cds-gap-sm)">Copilot covers its standalone website only, not the versions built into Windows and Office. Source: Similarweb, charted by Visual Capitalist, via Quartz (updated October 26, 2026). Full reference on the Method and sources tab.</p></div>
+  </section>
+
   <section id="scenarios" data-pg="scenarios" hidden>
     <div class="ux-card" style="margin-bottom:var(--cds-gap-md)">
       <h2 id="scen-nat">National scenarios</h2>
@@ -79,7 +108,7 @@
       <table id="tbl-snat" data-source="scen_nat" data-row-key="scenario"><thead><tr>
         <th data-field="scenario">Scenario</th><th data-field="growth_pct" class="num">12 month growth</th><th data-field="mau_now" class="num">Now</th><th data-field="mau_6m" class="num">6 months</th><th data-field="mau_12m" class="num">12 months</th>
       </tr></thead><tbody></tbody></table>
-        <details class="ux-more"><summary>How should I read these scenarios?</summary><div class="ux-prose"><p>The low, base and high cases show the same starting audience growing at three different speeds over the coming months. They are what-if exercises, not predictions, and the growth rates are assumptions chosen to bracket a plateau, modest growth and a stronger pickup.</p><p>The useful comparison is the spread between the cases. If the plateau case is closer to reality, reach grows mostly through new habits among existing users. If the high case is, the audience itself is expanding. Either way, more users does not automatically mean more people paying attention to ads, so treat these as audience-size scenarios, not ad-delivery scenarios.</p></div></details>
+        <details class="ux-more"><summary>How should I read these scenarios?</summary><div class="ux-prose"><p>The low, base and high cases show the same starting audience growing at three different speeds over the coming months. They are what-if exercises, not predictions, and the growth rates are assumptions chosen to bracket a plateau, modest growth and a stronger pickup.</p><p>The useful comparison is the spread between the cases. If the plateau case is closer to reality, reach grows mostly through new habits among existing users. If the high case is, the audience itself is expanding. Either way, more users does not automatically mean more people paying attention to ads, so treat these as audience-size scenarios, not ad-delivery scenarios.</p><p>Competition matters too. The share of chatbot web visits going to ChatGPT fell over the past year (see the Chatbot share tab), which makes the plateau and base cases easier to defend than the high case.</p></div></details>
     </div>
     <div class="ux-controls">
       <span>Scenario</span><span class="ux-seg" data-seg="scen"><button data-v="low" aria-pressed="false">Low</button><button data-v="base" aria-pressed="true">Base</button><button data-v="high" aria-pressed="false">High</button></span>
