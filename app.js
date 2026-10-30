@@ -23,14 +23,17 @@ function showTip(ev,lines){tip.replaceChildren();lines.forEach(t=>{const d=docum
 const hideTip=()=>{tip.style.display='none';};
 
 function ramp(v,min,max){const t=max>min?(v-min)/(max-min):0;return 'color-mix(in srgb, '+dash.colors[0]+' '+Math.round(8+62*t)+'%, var(--color-panel))';}
-function tileMap(el,rows,valFn,fmt,lines,legendLabel){
+const TCOL=r=>{if(!r.rank_trend)return 'color-mix(in srgb, var(--color-fg-muted) 22%, var(--color-panel))';const t=Math.min(1,Math.abs(r.rank_trend_places)/20),p=Math.round(35+50*t);return 'color-mix(in srgb, '+(r.rank_trend>0?'#2f9e6e':'#c2453f')+' '+p+'%, var(--color-panel))';};
+function trendLegend(el){const lg=document.createElement('div');lg.className='ux-legend';[['Slipping','color-mix(in srgb, #c2453f 70%, var(--color-panel))'],['Steady','color-mix(in srgb, var(--color-fg-muted) 22%, var(--color-panel))'],['Climbing','color-mix(in srgb, #2f9e6e 70%, var(--color-panel))']].forEach(([t,c])=>{const s=document.createElement('span');s.style.cssText='display:inline-block;width:.9rem;height:.9rem;border-radius:2px;background:'+c;const l=document.createElement('span');l.textContent=t;lg.append(s,l);});const n=document.createElement('span');n.textContent='Deeper color = bigger move since early 2025';lg.append(n);el.append(lg);}
+function tileMap(el,rows,valFn,fmt,lines,legendLabel,opts){
   el.replaceChildren();
   const vals=rows.map(valFn);const mn=d3.min(vals),mx=d3.max(vals);
   const g=document.createElement('div');g.className='ux-tiles';
-  rows.forEach(r=>{const t=document.createElement('div');t.className='ux-tile';t.style.gridColumn=(+r.col+1);t.style.gridRow=(+r.row+1);t.style.background=ramp(valFn(r),mn,mx);
+  rows.forEach(r=>{const t=document.createElement('div');t.className='ux-tile';t.style.gridColumn=(+r.col+1);t.style.gridRow=(+r.row+1);t.style.background=opts&&opts.fill?opts.fill(r):ramp(valFn(r),mn,mx);
     const b=document.createElement('b');b.textContent=r.code;t.append(b);
     t.addEventListener('mousemove',e=>showTip(e,lines(r)));t.addEventListener('mouseleave',hideTip);g.append(t);});
   el.append(g);
+  if(opts&&opts.fill){trendLegend(el);return;}
   const lg=document.createElement('div');lg.className='ux-legend';
   const lo=document.createElement('span');lo.textContent=fmt(mn);
   const rp=document.createElement('span');rp.className='ux-ramp';rp.style.background='linear-gradient(to right, '+ramp(mn,mn,mx)+', '+ramp(mx,mn,mx)+')';
@@ -38,17 +41,18 @@ function tileMap(el,rows,valFn,fmt,lines,legendLabel){
   const lb=document.createElement('span');lb.textContent=legendLabel;
   lg.append(lo,rp,hi,lb);el.append(lg);
 }
-function choropleth(el,rows,valFn,fmt,lines,legendLabel){
+function choropleth(el,rows,valFn,fmt,lines,legendLabel,opts){
   el.replaceChildren();
   const geo=dash.data('geo').data;const by=new Map(rows.map(r=>[r.code,r]));
   const vals=rows.map(valFn);const mn=d3.min(vals),mx=d3.max(vals);
   const svg=d3.select(el).append('svg').attr('width','100%').attr('viewBox','0 0 975 610').attr('role','img');
   const bind=(sel,r)=>sel.on('mouseenter',function(){d3.select(this).raise();}).on('mousemove',e=>showTip(e,lines(r))).on('mouseleave',hideTip);
   geo.forEach(g=>{const r=by.get(g.code);if(!r)return;
-    bind(svg.append('path').attr('d',g.path).attr('class','ux-st').style('fill',ramp(valFn(r),mn,mx)).style('stroke','var(--color-bg)').attr('stroke-width',1).attr('stroke-linejoin','round'),r);});
+    bind(svg.append('path').attr('d',g.path).attr('class','ux-st').style('fill',opts&&opts.fill?opts.fill(r):ramp(valFn(r),mn,mx)).style('stroke','var(--color-bg)').attr('stroke-width',1).attr('stroke-linejoin','round'),r);});
   const dc=geo.find(g=>g.code==='DC'),dr=by.get('DC');
-  if(dc&&dr){bind(svg.append('circle').attr('class','ux-st').attr('cx',dc.cx+14).attr('cy',dc.cy+4).attr('r',6).style('fill',ramp(valFn(dr),mn,mx)).style('stroke','var(--color-fg-muted)').attr('stroke-width',1),dr);
+  if(dc&&dr){bind(svg.append('circle').attr('class','ux-st').attr('cx',dc.cx+14).attr('cy',dc.cy+4).attr('r',6).style('fill',opts&&opts.fill?opts.fill(dr):ramp(valFn(dr),mn,mx)).style('stroke','var(--color-fg-muted)').attr('stroke-width',1),dr);
     svg.append('text').attr('x',dc.cx+23).attr('y',dc.cy+8).attr('font-size',12).style('fill','var(--color-fg-muted)').text('DC');}
+  if(opts&&opts.fill){trendLegend(el);return;}
   const lg=document.createElement('div');lg.className='ux-legend';
   const lo=document.createElement('span');lo.textContent=fmt(mn);
   const rp=document.createElement('span');rp.className='ux-ramp';rp.style.background='linear-gradient(to right, '+ramp(mn,mn,mx)+', '+ramp(mx,mn,mx)+')';
@@ -56,9 +60,9 @@ function choropleth(el,rows,valFn,fmt,lines,legendLabel){
   const lb=document.createElement('span');lb.textContent=legendLabel;
   lg.append(lo,rp,hi,lb);el.append(lg);
 }
-function drawMap(el,rows,valFn,fmt,lines,label){
-  if(ui.view==='map'){const g=dash.data('geo');if(g.status==='ok')return choropleth(el,rows,valFn,fmt,lines,label);if(g.status!=='loading')return fail(el,'geo');return el.replaceChildren();}
-  return tileMap(el,rows,valFn,fmt,lines,label);
+function drawMap(el,rows,valFn,fmt,lines,label,opts){
+  if(ui.view==='map'){const g=dash.data('geo');if(g.status==='ok')return choropleth(el,rows,valFn,fmt,lines,label,opts);if(g.status!=='loading')return fail(el,'geo');return el.replaceChildren();}
+  return tileMap(el,rows,valFn,fmt,lines,label,opts);
 }
 function buildTable(tbl,cols,rows,keyFn,sortKey){
   const tb=tbl.tBodies[0];tb.replaceChildren();
@@ -149,7 +153,8 @@ function render(){
   if(ui.page==='usage'){
     const mapEl=document.getElementById('map-usage');
     if(st.status!=='ok'){fail(mapEl,'states');}else{const rows=st.data.map(r=>({...r}));
-      if(ui.metric==='pct')drawMap(mapEl,rows,r=>+r.pct_of_population,v=>fPct1(v)+'%',r=>[r.state,fInt(r.mau_base)+' modeled users',fPct1(r.pct_of_population)+'% of residents','Usage rank '+r.usage_rank+' of 51'],'% of residents');
+      if(ui.metric==='trend')drawMap(mapEl,rows,r=>+r.rank_trend_places,v=>String(v),r=>[r.state,r.growth_label,'Usage rank '+r.usage_rank+' of 51 (2026 Q3)',fPct1(r.pct_of_population)+'% of residents (modeled)'],'rank trend',{fill:TCOL});
+      else if(ui.metric==='pct')drawMap(mapEl,rows,r=>+r.pct_of_population,v=>fPct1(v)+'%',r=>[r.state,fInt(r.mau_base)+' modeled users',fPct1(r.pct_of_population)+'% of residents','Usage rank '+r.usage_rank+' of 51'],'% of residents');
       else drawMap(mapEl,rows,r=>+r.mau_base,v=>compact.format(v),r=>[r.state,fInt(r.mau_base)+' modeled users',fPct1(r.pct_of_population)+'% of residents','Usage rank '+r.usage_rank+' of 51'],'users');
       const tbl=document.getElementById('tbl-usage');if(sort.usage.f==='mau_base'||sort.usage.f==='pct_of_population')rankBy=sort.usage.f;
       const order=rows.slice().sort(rankBy==='mau_base'?(a,b)=>b.mau_base-a.mau_base||a.state.localeCompare(b.state):(a,b)=>a.usage_rank-b.usage_rank);
@@ -164,13 +169,19 @@ function render(){
       const qs=Array.from(new Set(rq.data.map(r=>r.quarter)));
       const muted='var(--cds-chart-muted)';
       const series=names.map(n=>({name:n,strong:n==='United States',color:n==='United States'?dash.colors[0]:muted,values:qs.map(qq=>({x:qq,y:+(rq.data.find(r=>r.country===n&&r.quarter===qq)||{}).rank}))}));
-      lineChart(ce,series,{xs:d3.scalePoint(qs,[0,1]).padding(0.1),yDomain:[1,100],invert:true,fmtX:s=>s,fmtY:v=>String(Math.round(v))});}
+      lineChart(ce,series,{xs:d3.scalePoint(qs,[0,1]).padding(0.1),yDomain:[1,120],invert:true,fmtX:s=>s,fmtY:v=>String(Math.round(v))});}
     if(ws.status!=='ok')fail(cw,'work_share');else{
       const parse=d3.utcParse('%Y-%m');const rows=ws.data.map(r=>({d:parse(r.month),us:+r.united_states,all:+r.all_countries}));
       const series=[{name:'United States',strong:true,color:dash.colors[0],values:rows.map(r=>({x:r.d,y:r.us}))},{name:'All countries',color:'var(--cds-chart-muted)',values:rows.map(r=>({x:r.d,y:r.all}))}];
       lineChart(cw,series,{xs:d3.scaleUtc(d3.extent(rows,r=>r.d),[0,1]),yDomain:[60,0],fmtX:d3.utcFormat('%b %Y'),fmtY:v=>Math.round(v)+'%'});
       }
-    if(st.status!=='ok')fail(chips,'states');else{chips.replaceChildren();st.data.filter(r=>r.growth_lists>0).sort((a,b)=>b.growth_lists-a.growth_lists||a.state.localeCompare(b.state)).forEach(r=>{const c=document.createElement('span');c.className='ux-chip'+(r.growth_lists===2?' two':'');c.textContent=r.state;chips.append(c);});}
+    const sq=dash.data('state_rank_quarter'),sce=document.getElementById('ch-strank');
+    if(st.status!=='ok'||sq.status!=='ok'){fail(chips,'states');fail(sce,'state_rank_quarter');}else{
+      chips.replaceChildren();st.data.filter(r=>r.rank_trend!==0).sort((a,b)=>b.rank_trend_places-a.rank_trend_places).forEach(r=>{const c=document.createElement('span');c.className='ux-chip'+(r.rank_trend===1?' two':'');c.textContent=r.state+' ('+(r.rank_trend_places>0?'+':'−')+Math.abs(r.rank_trend_places)+')';chips.append(c);});
+      const sqs=Array.from(new Set(sq.data.map(r=>r.quarter)));
+      const byTr=st.data.slice().sort((a,b)=>b.rank_trend_places-a.rank_trend_places);const up=byTr.slice(0,4).map(r=>r.state),down=byTr.slice(-3).map(r=>r.state);
+      const mkS=(n,color,strong)=>({name:n,strong,color,values:sqs.map(qq=>({x:qq,y:+(sq.data.find(r=>r.state===n&&r.quarter===qq)||{}).rank}))});
+      lineChart(sce,up.map((n,i)=>mkS(n,dash.colors[i]||dash.colors[0],true)).concat(down.map(n=>mkS(n,'var(--cds-chart-muted)',false))),{xs:d3.scalePoint(sqs,[0,1]).padding(0.1),yDomain:[1,52],invert:true,fmtX:s=>s,fmtY:v=>String(Math.round(v))});}
   }
   if(ui.page==='chatbots'){
     const cb=dash.data('chatbots'),sl=document.getElementById('ch-slope'),tr=document.getElementById('ch-trend');
